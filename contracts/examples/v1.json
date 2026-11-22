@@ -1,0 +1,382 @@
+{
+  "AgentMessageRequest": {
+    "value": {
+      "requestId": "turn-example",
+      "locale": "zh-CN",
+      "message": {
+        "kind": "text",
+        "text": "我想先用文字了解课程。"
+      }
+    }
+  },
+  "VisionAnalyzeRequest": {
+    "value": {
+      "task": "cheek_color_balance",
+      "authorization": {
+        "scope": "local_observation",
+        "granted": true
+      },
+      "observation": {
+        "captureId": "frame-example",
+        "capturedAt": "2026-11-21T04:00:00Z",
+        "methodVersion": "example-fixture",
+        "coordinateSpace": "image",
+        "quality": "unknown"
+      }
+    }
+  },
+  "MemoryProposalRequest": {
+    "value": {
+      "operation": "create",
+      "preference": {
+        "key": "finish",
+        "value": "synthetic matte preference"
+      }
+    }
+  },
+  "MemoryCorrectionRequest": {
+    "value": {
+      "operation": "correct",
+      "memoryId": "memory-example",
+      "expectedVersion": 1,
+      "preference": {
+        "key": "finish",
+        "value": "synthetic dewy preference"
+      }
+    }
+  },
+  "MemoryConfirmRequest": {
+    "value": {
+      "proposalId": "proposal-example",
+      "expectedVersion": 1,
+      "confirmed": true
+    }
+  },
+  "ProductQuery": {
+    "value": {
+      "category": "lips",
+      "ids": [
+        "fictional-lip-sample"
+      ]
+    }
+  },
+  "AgentMessageResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "session": {
+          "id": "session-example",
+          "locale": "zh-CN",
+          "workflow": {
+            "stage": "conversation",
+            "revision": null,
+            "stepId": null
+          }
+        },
+        "content": {
+          "speech": "模拟模式已收到文字。",
+          "display": {
+            "text": "开发模拟：已收到文字。此回复由固定示例生成。"
+          }
+        }
+      }
+    }
+  },
+  "VisionAnalysisResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "task": "cheek_color_balance",
+        "status": "inconclusive",
+        "predictions": [],
+        "confidence": null,
+        "quality": {
+          "level": "unknown",
+          "reasons": [
+            "mock_no_inference"
+          ]
+        },
+        "coordinateSpace": "unknown",
+        "methodVersion": "trace-mock-v1"
+      }
+    }
+  },
+  "MemoryProfileResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "records": [
+          {
+            "id": "memory-example",
+            "version": 1,
+            "preference": {
+              "key": "finish",
+              "value": "synthetic matte preference"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MemoryProposalResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "id": "proposal-example",
+        "version": 1,
+        "operation": "create",
+        "memoryId": null,
+        "preference": {
+          "key": "finish",
+          "value": "synthetic matte preference"
+        },
+        "expiresAt": "2026-11-21T04:05:00Z"
+      }
+    }
+  },
+  "MemoryConfirmationResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "id": "memory-example",
+        "version": 1,
+        "preference": {
+          "key": "finish",
+          "value": "synthetic matte preference"
+        }
+      }
+    }
+  },
+  "MemoryDeletionResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "id": "memory-example",
+        "status": "deleted"
+      }
+    }
+  },
+  "ProductCatalogResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "items": [
+          {
+            "id": "fictional-lip-sample",
+            "name": "TRACE fictional lip sample",
+            "category": "lips",
+            "attributes": {
+              "shade": null,
+              "finish": null
+            },
+            "provenance": {
+              "status": "synthetic",
+              "title": "TRACE development fixture",
+              "url": null
+            }
+          },
+          {
+            "id": "fictional-brush-sample",
+            "name": "TRACE fictional brush sample",
+            "category": "tools",
+            "attributes": {
+              "shade": null,
+              "finish": null
+            },
+            "provenance": {
+              "status": "synthetic",
+              "title": "TRACE development fixture",
+              "url": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  "HealthResponse": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "data": {
+        "status": "alive",
+        "dependencies": {
+          "agent": "unchecked",
+          "vision": "unchecked",
+          "memory": "unchecked",
+          "products": "unchecked"
+        }
+      }
+    }
+  },
+  "Error400": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "BAD_REQUEST",
+        "message": "Example bad request.",
+        "retryable": false
+      }
+    }
+  },
+  "Error401": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "message": "Example unauthenticated.",
+        "retryable": false
+      }
+    }
+  },
+  "Error403": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "FORBIDDEN",
+        "message": "Example forbidden.",
+        "retryable": false
+      }
+    }
+  },
+  "Error404": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "Example not found.",
+        "retryable": false
+      }
+    }
+  },
+  "Error405": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "METHOD_NOT_ALLOWED",
+        "message": "Example method not allowed.",
+        "retryable": false
+      }
+    }
+  },
+  "Error409": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "CONFLICT",
+        "message": "Example conflict.",
+        "retryable": false
+      }
+    }
+  },
+  "Error413": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "PAYLOAD_TOO_LARGE",
+        "message": "Example payload too large.",
+        "retryable": false
+      }
+    }
+  },
+  "Error415": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "UNSUPPORTED_MEDIA_TYPE",
+        "message": "Example unsupported media type.",
+        "retryable": false
+      }
+    }
+  },
+  "Error500": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "INTERNAL_ERROR",
+        "message": "Example internal error.",
+        "retryable": false
+      }
+    }
+  },
+  "Error503": {
+    "value": {
+      "meta": {
+        "apiVersion": "v1",
+        "source": "mock",
+        "requestId": "example-response"
+      },
+      "error": {
+        "code": "UNAVAILABLE",
+        "message": "Example unavailable.",
+        "retryable": true
+      }
+    }
+  }
+}

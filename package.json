@@ -1,0 +1,26 @@
+{
+  "name": "trace-v2",
+  "version": "0.2.0-live.1",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "26.10.0" },
+  "scripts": {
+    "mock": "node --env-file-if-exists=.env backend/mock/server.mjs",
+    "generate:types": "node scripts/generate-contract-types.mjs --write",
+    "check:types": "node scripts/generate-contract-types.mjs && tsc --noEmit",
+    "test": "node --test tests/contract/*.test.mjs tests/integration/*.test.mjs",
+    "build:preview": "tsc -p apps/web/preview/tsconfig.json",
+    "build:public": "npm run build:preview && node scripts/build-public-demo.mjs",
+    "preview:local": "npm run build:preview && node scripts/web-preview.mjs",
+    "verify": "npm run check:types && npm test"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}

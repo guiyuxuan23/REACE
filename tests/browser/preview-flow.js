@@ -1,0 +1,83 @@
+async page => {
+  const check = (value, label) => { if (!value) throw Error(label); };
+  const base = new URL(page.url()).origin;
+  check(/^http:\/\/127\.0\.0\.1:\d+$/.test(base), 'Expected the loopback preview');
+  const errors = [];
+  const observations = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => {
+    if (request.url() === base + '/api/v1/vision/analyze') observations.push(request.postDataJSON());
+  });
+  await page.addInitScript(() => {
+    globalThis.traceCameraCalls = 0;
+    Object.defineProperty(navigator.mediaDevices, 'getUserMedia', { value: async () => {
+      globalThis.traceCameraCalls++;
+      if (globalThis.traceCameraCalls === 1) throw new DOMException('Denied test permission', 'NotAllowedError');
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 64;
+      const context = canvas.getContext('2d');
+      const stream = canvas.captureStream(0);
+      const track = stream.getVideoTracks()[0];
+      const timer = setInterval(() => { context.fillRect(0, 0, 32, 64); track.requestFrame(); if (track.readyState === 'ended') clearInterval(timer); }, 50);
+      globalThis.traceFixtureStream = stream;
+      return stream;
+    }});
+    globalThis.traceSpoken = [];
+    Object.defineProperty(speechSynthesis, 'getVoices', { value: () => [{ lang: 'zh-CN', localService: true }] });
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: class { constructor(text) { this.text = text; } } });
+    Object.defineProperty(speechSynthesis, 'speak', { value: utterance => globalThis.traceSpoken.push(utterance.text) });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(base);
+  await page.waitForSelector('#goal');
+  check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'No horizontal overflow at 390px');
+  check(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), 'Reduced motion fixture');
+  check(await page.evaluate(() => globalThis.traceCameraCalls === 0), 'No on-load camera permission');
+  await page.keyboard.press('Tab');
+  check(await page.evaluate(() => document.activeElement.textContent === '跳到正文'), 'The skip link must be first');
+  await page.keyboard.press('Enter');
+  check(await page.evaluate(() => document.activeElement.id === 'main'), 'Skip moved focus');
+  await page.getByRole('button', { name: '大字模式' }).click();
+  check(await page.getByRole('button', { name: '大字模式' }).getAttribute('aria-pressed') === 'true', 'Large print control');
+
+  await page.getByRole('button', { name: '提交目标' }).click();
+  await page.getByRole('button', { name: '确认，开始演练' }).click();
+  check(await page.evaluate(() => document.activeElement.id === 'step-title'), 'Step transition moves focus');
+  await page.getByRole('button', { name: '朗读本步' }).click();
+  await page.getByRole('button', { name: '允许并打开预览' }).click();
+  await page.getByText('无法开启摄像头。你可以继续文字练习。').waitFor();
+  await page.getByRole('button', { name: '允许并打开预览' }).click();
+  await page.getByText('仅预览。没有抓拍、保留照片或分析妆效。').waitFor();
+  await page.getByRole('button', { name: '关闭摄像头' }).click();
+  check(await page.evaluate(() => globalThis.traceFixtureStream.getTracks().every(track => track.readyState === 'ended')), 'Camera stop releases media');
+  await page.getByRole('button', { name: '演练观测反馈' }).click();
+  await page.getByText('演练反馈：信息不足，无法判断。本次没有分析照片，也没有妆效预测。').waitFor();
+  check(observations.length === 1 && !('image' in observations[0]) && observations[0].observation.methodVersion === 'synthetic-preview', 'Metadata only');
+  await page.getByRole('button', { name: '完成这一步' }).click();
+  await page.getByRole('button', { name: '跳过', exact: true }).click();
+  await page.getByRole('button', { name: '完成这一步' }).click();
+  await page.getByText('自然妆演练完成。完成 2 步，跳过 1 步。没有生成妆效结论。').waitFor();
+  await page.getByRole('button', { name: '朗读小结' }).click();
+  check(await page.evaluate(() => globalThis.traceSpoken.length === 2), 'Two TTS invocations observed with the speech fixture');
+
+  const preference = page.getByLabel('想保留的妆效偏好');
+  await preference.fill('演练偏好：哑光');
+  await page.getByRole('button', { name: '预览偏好' }).click();
+  await page.getByText('待确认：演练偏好：哑光').waitFor();
+  check(await page.locator('#records li').count() === 0, 'Preview must not write memory');
+  await page.getByRole('button', { name: '确认保存' }).click();
+  await page.locator('#records').getByText('演练偏好：哑光').waitFor();
+  await page.getByRole('button', { name: '更正' }).click();
+  await preference.fill('演练偏好：半哑光');
+  await page.getByRole('button', { name: '预览偏好' }).click();
+  await page.getByRole('button', { name: '确认保存' }).click();
+  await page.locator('#records').getByText('演练偏好：半哑光').waitFor();
+  await page.getByRole('button', { name: /删除偏好/ }).click();
+  check(await page.getByRole('button', { name: '确认删除' }).evaluate(button => button === document.activeElement), 'Deletion confirmation receives focus');
+  await page.getByRole('button', { name: '确认删除' }).click();
+  await page.getByText('演练偏好已删除。').waitFor();
+  check(await page.locator('#records li').count() === 0, 'Deletion removes memory');
+  check(errors.length === 0, errors.join('\n'));
+  return 'PASS: keyboard focus, 390px + reduced motion, denied / fixture camera + cleanup, metadata only, natural-look completion + TTS fixture, memory review / correction / deletion.';
+}

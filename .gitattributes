@@ -1,0 +1,2 @@
+* text=auto eol=lf
+apps/web/preview/assets/*-SOURCE.txt -text

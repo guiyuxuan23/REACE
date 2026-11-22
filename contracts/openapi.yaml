@@ -1,0 +1,550 @@
+openapi: 3.1.0
+info:
+  title: TRACE V2 integration API
+  version: 1.0.0
+  description: Initial contract. The included development mock is visibly synthetic. Live deployment is gated separately.
+servers:
+- url: http://127.0.0.1:8001
+  description: Local development mock. Override using the development environment.
+paths:
+  /api/v1/agent/message:
+    post:
+      operationId: sendAgentMessage
+      summary: Send a text turn and return a session/workflow snapshot
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      responses:
+        '200':
+          description: Send a text turn and return a session/workflow snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentMessageResponse'
+              examples:
+                AgentMessageResponse:
+                  $ref: ./examples/v1.json#/AgentMessageResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '401':
+          $ref: '#/components/responses/Http401'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '404':
+          $ref: '#/components/responses/Http404'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '409':
+          $ref: '#/components/responses/Http409'
+        '413':
+          $ref: '#/components/responses/Http413'
+        '415':
+          $ref: '#/components/responses/Http415'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentMessageRequest'
+            examples:
+              AgentMessageRequest:
+                $ref: ./examples/v1.json#/AgentMessageRequest
+  /api/v1/vision/analyze:
+    post:
+      operationId: analyzeVision
+      summary: Evaluate an authorized structured local observation
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      responses:
+        '200':
+          description: Evaluate an authorized structured local observation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisionAnalysisResponse'
+              examples:
+                VisionAnalysisResponse:
+                  $ref: ./examples/v1.json#/VisionAnalysisResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '401':
+          $ref: '#/components/responses/Http401'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '404':
+          $ref: '#/components/responses/Http404'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '409':
+          $ref: '#/components/responses/Http409'
+        '413':
+          $ref: '#/components/responses/Http413'
+        '415':
+          $ref: '#/components/responses/Http415'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisionAnalyzeRequest'
+            examples:
+              VisionAnalyzeRequest:
+                $ref: ./examples/v1.json#/VisionAnalyzeRequest
+  /api/v1/memory/profile:
+    get:
+      operationId: getMemoryProfile
+      summary: Read the authenticated owner’s confirmed preferences
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      responses:
+        '200':
+          description: Read the authenticated owner’s confirmed preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryProfileResponse'
+              examples:
+                MemoryProfileResponse:
+                  $ref: ./examples/v1.json#/MemoryProfileResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '401':
+          $ref: '#/components/responses/Http401'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+  /api/v1/memory/proposals:
+    post:
+      operationId: proposeMemory
+      summary: Prepare a versioned preference candidate without saving it
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      responses:
+        '201':
+          description: Prepare a versioned preference candidate without saving it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryProposalResponse'
+              examples:
+                MemoryProposalResponse:
+                  $ref: ./examples/v1.json#/MemoryProposalResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '401':
+          $ref: '#/components/responses/Http401'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '404':
+          $ref: '#/components/responses/Http404'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '409':
+          $ref: '#/components/responses/Http409'
+        '413':
+          $ref: '#/components/responses/Http413'
+        '415':
+          $ref: '#/components/responses/Http415'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryProposalRequest'
+            examples:
+              MemoryProposalRequest:
+                $ref: ./examples/v1.json#/MemoryProposalRequest
+              MemoryCorrectionRequest:
+                $ref: ./examples/v1.json#/MemoryCorrectionRequest
+  /api/v1/memory/confirm:
+    post:
+      operationId: confirmMemory
+      summary: Explicitly confirm and save one reviewed version
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      responses:
+        '200':
+          description: Explicitly confirm and save one reviewed version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryConfirmationResponse'
+              examples:
+                MemoryConfirmationResponse:
+                  $ref: ./examples/v1.json#/MemoryConfirmationResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '401':
+          $ref: '#/components/responses/Http401'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '404':
+          $ref: '#/components/responses/Http404'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '409':
+          $ref: '#/components/responses/Http409'
+        '413':
+          $ref: '#/components/responses/Http413'
+        '415':
+          $ref: '#/components/responses/Http415'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryConfirmRequest'
+            examples:
+              MemoryConfirmRequest:
+                $ref: ./examples/v1.json#/MemoryConfirmRequest
+  /api/v1/memory/{memory_id}:
+    delete:
+      operationId: deleteMemory
+      summary: Delete a preference and revoke its associated receipts
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      - name: memory_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Identifier'
+        example: memory-example
+      responses:
+        '200':
+          description: Delete a preference and revoke its associated receipts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryDeletionResponse'
+              examples:
+                MemoryDeletionResponse:
+                  $ref: ./examples/v1.json#/MemoryDeletionResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '401':
+          $ref: '#/components/responses/Http401'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '404':
+          $ref: '#/components/responses/Http404'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '409':
+          $ref: '#/components/responses/Http409'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+  /api/v1/products:
+    get:
+      operationId: listProducts
+      summary: Read a verified catalogue or a distinctly labelled mock catalogue
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      - name: category
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/Category'
+        example: lips
+      - name: ids
+        in: query
+        required: false
+        style: form
+        explode: true
+        description: Repeat ids for a side-by-side comparison.
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identifier'
+          maxItems: 10
+          minItems: 1
+          uniqueItems: true
+        example:
+        - fictional-lip-sample
+      responses:
+        '200':
+          description: Read a verified catalogue or a distinctly labelled mock catalogue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCatalogResponse'
+              examples:
+                ProductCatalogResponse:
+                  $ref: ./examples/v1.json#/ProductCatalogResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '401':
+          $ref: '#/components/responses/Http401'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+  /health:
+    get:
+      operationId: getHealth
+      summary: Check process liveness and report only available dependency evidence
+      security: []
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Correlation key. Separate from Agent requestId.
+        schema:
+          $ref: '#/components/schemas/Identifier'
+      responses:
+        '200':
+          description: Check process liveness and report only available dependency evidence
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                HealthResponse:
+                  $ref: ./examples/v1.json#/HealthResponse
+        '400':
+          $ref: '#/components/responses/Http400'
+        '403':
+          $ref: '#/components/responses/Http403'
+        '405':
+          $ref: '#/components/responses/Http405'
+        '500':
+          $ref: '#/components/responses/Http500'
+        '503':
+          $ref: '#/components/responses/Http503'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Injected per-client bearer token. Local mock uses a developer-configured test token. Live issuer and
+        owner mapping require deployment approval.
+  schemas:
+    Identifier:
+      $ref: ./schemas/v1.json#/$defs/Identifier
+    Version:
+      $ref: ./schemas/v1.json#/$defs/Version
+    Locale:
+      $ref: ./schemas/v1.json#/$defs/Locale
+    Meta:
+      $ref: ./schemas/v1.json#/$defs/Meta
+    ErrorResponse:
+      $ref: ./schemas/v1.json#/$defs/ErrorResponse
+    AgentMessageRequest:
+      $ref: ./schemas/v1.json#/$defs/AgentMessageRequest
+    AgentMessage:
+      $ref: ./schemas/v1.json#/$defs/AgentMessage
+    VisionTask:
+      $ref: ./schemas/v1.json#/$defs/VisionTask
+    VisionQuality:
+      $ref: ./schemas/v1.json#/$defs/VisionQuality
+    VisionAnalyzeRequest:
+      $ref: ./schemas/v1.json#/$defs/VisionAnalyzeRequest
+    Prediction:
+      $ref: ./schemas/v1.json#/$defs/Prediction
+    VisionAnalysis:
+      $ref: ./schemas/v1.json#/$defs/VisionAnalysis
+    Preference:
+      $ref: ./schemas/v1.json#/$defs/Preference
+    MemoryRecord:
+      $ref: ./schemas/v1.json#/$defs/MemoryRecord
+    MemoryProfile:
+      $ref: ./schemas/v1.json#/$defs/MemoryProfile
+    MemoryProposalRequest:
+      $ref: ./schemas/v1.json#/$defs/MemoryProposalRequest
+    MemoryProposal:
+      $ref: ./schemas/v1.json#/$defs/MemoryProposal
+    MemoryConfirmRequest:
+      $ref: ./schemas/v1.json#/$defs/MemoryConfirmRequest
+    MemoryDeletion:
+      $ref: ./schemas/v1.json#/$defs/MemoryDeletion
+    Category:
+      $ref: ./schemas/v1.json#/$defs/Category
+    Product:
+      $ref: ./schemas/v1.json#/$defs/Product
+    ProductQuery:
+      $ref: ./schemas/v1.json#/$defs/ProductQuery
+    ProductCatalog:
+      $ref: ./schemas/v1.json#/$defs/ProductCatalog
+    Health:
+      $ref: ./schemas/v1.json#/$defs/Health
+    AgentMessageResponse:
+      $ref: ./schemas/v1.json#/$defs/AgentMessageResponse
+    VisionAnalysisResponse:
+      $ref: ./schemas/v1.json#/$defs/VisionAnalysisResponse
+    MemoryProfileResponse:
+      $ref: ./schemas/v1.json#/$defs/MemoryProfileResponse
+    MemoryProposalResponse:
+      $ref: ./schemas/v1.json#/$defs/MemoryProposalResponse
+    MemoryConfirmationResponse:
+      $ref: ./schemas/v1.json#/$defs/MemoryConfirmationResponse
+    MemoryDeletionResponse:
+      $ref: ./schemas/v1.json#/$defs/MemoryDeletionResponse
+    ProductCatalogResponse:
+      $ref: ./schemas/v1.json#/$defs/ProductCatalogResponse
+    HealthResponse:
+      $ref: ./schemas/v1.json#/$defs/HealthResponse
+  responses:
+    Http400:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error400:
+              $ref: ./examples/v1.json#/Error400
+    Http401:
+      description: Unauthenticated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error401:
+              $ref: ./examples/v1.json#/Error401
+    Http403:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error403:
+              $ref: ./examples/v1.json#/Error403
+    Http404:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error404:
+              $ref: ./examples/v1.json#/Error404
+    Http405:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error405:
+              $ref: ./examples/v1.json#/Error405
+    Http409:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error409:
+              $ref: ./examples/v1.json#/Error409
+    Http413:
+      description: Payload Too Large
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error413:
+              $ref: ./examples/v1.json#/Error413
+    Http415:
+      description: Unsupported Media Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error415:
+              $ref: ./examples/v1.json#/Error415
+    Http500:
+      description: Internal Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error500:
+              $ref: ./examples/v1.json#/Error500
+    Http503:
+      description: Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Error503:
+              $ref: ./examples/v1.json#/Error503

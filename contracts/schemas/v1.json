@@ -1,0 +1,1021 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.trace.invalid/v1",
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,80}$"
+    },
+    "Version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "Locale": {
+      "type": "string",
+      "enum": [
+        "zh-CN",
+        "en"
+      ]
+    },
+    "Meta": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "const": "v1"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "mock",
+            "live"
+          ]
+        },
+        "requestId": {
+          "$ref": "#/$defs/Identifier"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "source",
+        "requestId"
+      ],
+      "additionalProperties": false
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "BAD_REQUEST",
+                "UNAUTHENTICATED",
+                "FORBIDDEN",
+                "NOT_FOUND",
+                "METHOD_NOT_ALLOWED",
+                "CONFLICT",
+                "PAYLOAD_TOO_LARGE",
+                "UNSUPPORTED_MEDIA_TYPE",
+                "INTERNAL_ERROR",
+                "UNAVAILABLE"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retryable"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "meta",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "AgentMessageRequest": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "locale": {
+          "$ref": "#/$defs/Locale"
+        },
+        "message": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "text"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000,
+              "pattern": "\\S"
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "requestId",
+        "locale",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "AgentMessage": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Identifier"
+            },
+            "locale": {
+              "$ref": "#/$defs/Locale"
+            },
+            "workflow": {
+              "type": "object",
+              "properties": {
+                "stage": {
+                  "type": "string",
+                  "enum": [
+                    "conversation",
+                    "guidance",
+                    "paused",
+                    "completed"
+                  ]
+                },
+                "revision": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Version"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stepId": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Identifier"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "stage",
+                "revision",
+                "stepId"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "locale",
+            "workflow"
+          ],
+          "additionalProperties": false
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "speech": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "display": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              },
+              "required": [
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "speech",
+            "display"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "session",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "VisionTask": {
+      "type": "string",
+      "enum": [
+        "cheek_color_balance",
+        "lip_color"
+      ]
+    },
+    "VisionQuality": {
+      "type": "string",
+      "enum": [
+        "usable",
+        "poor",
+        "unknown"
+      ]
+    },
+    "VisionAnalyzeRequest": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "task": {
+          "$ref": "#/$defs/VisionTask"
+        },
+        "authorization": {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "string",
+              "const": "local_observation"
+            },
+            "granted": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "scope",
+            "granted"
+          ],
+          "additionalProperties": false
+        },
+        "observation": {
+          "type": "object",
+          "properties": {
+            "captureId": {
+              "$ref": "#/$defs/Identifier"
+            },
+            "capturedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "methodVersion": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "coordinateSpace": {
+              "type": "string",
+              "enum": [
+                "image",
+                "user",
+                "unknown"
+              ]
+            },
+            "quality": {
+              "$ref": "#/$defs/VisionQuality"
+            }
+          },
+          "required": [
+            "captureId",
+            "capturedAt",
+            "methodVersion",
+            "coordinateSpace",
+            "quality"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "task",
+        "authorization",
+        "observation"
+      ],
+      "additionalProperties": false
+    },
+    "Prediction": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "similar_cheek_redness",
+            "left_higher_redness",
+            "right_higher_redness",
+            "lip_region_measured"
+          ]
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "VisionAnalysis": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "$ref": "#/$defs/VisionTask"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "observed",
+            "inconclusive"
+          ]
+        },
+        "predictions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Prediction"
+          },
+          "maxItems": 4
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "calibrated": {
+                  "type": "boolean",
+                  "const": true
+                }
+              },
+              "required": [
+                "score",
+                "calibrated"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quality": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "$ref": "#/$defs/VisionQuality"
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "maxItems": 10
+            }
+          },
+          "required": [
+            "level",
+            "reasons"
+          ],
+          "additionalProperties": false
+        },
+        "coordinateSpace": {
+          "type": "string",
+          "enum": [
+            "image",
+            "user",
+            "unknown"
+          ]
+        },
+        "methodVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "task",
+        "status",
+        "predictions",
+        "confidence",
+        "quality",
+        "coordinateSpace",
+        "methodVersion"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "inconclusive"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "predictions": {
+                "type": "array",
+                "maxItems": 0
+              },
+              "confidence": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "type": "object",
+            "properties": {
+              "predictions": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Preference": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "enum": [
+            "finish",
+            "fragrance",
+            "tools"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "version": {
+          "$ref": "#/$defs/Version"
+        },
+        "preference": {
+          "$ref": "#/$defs/Preference"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "preference"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryProfile": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MemoryRecord"
+          },
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "records"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryProposalRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string",
+              "const": "create"
+            },
+            "preference": {
+              "$ref": "#/$defs/Preference"
+            }
+          },
+          "required": [
+            "operation",
+            "preference"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string",
+              "const": "correct"
+            },
+            "memoryId": {
+              "$ref": "#/$defs/Identifier"
+            },
+            "expectedVersion": {
+              "$ref": "#/$defs/Version"
+            },
+            "preference": {
+              "$ref": "#/$defs/Preference"
+            }
+          },
+          "required": [
+            "operation",
+            "memoryId",
+            "expectedVersion",
+            "preference"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MemoryProposal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "version": {
+          "$ref": "#/$defs/Version"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "create",
+            "correct"
+          ]
+        },
+        "memoryId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preference": {
+          "$ref": "#/$defs/Preference"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "operation",
+        "memoryId",
+        "preference",
+        "expiresAt"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryConfirmRequest": {
+      "type": "object",
+      "properties": {
+        "proposalId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "expectedVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "confirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "proposalId",
+        "expectedVersion",
+        "confirmed"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryDeletion": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "status": {
+          "type": "string",
+          "const": "deleted"
+        }
+      },
+      "required": [
+        "id",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "Category": {
+      "type": "string",
+      "enum": [
+        "face",
+        "lips",
+        "tools"
+      ]
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "shade": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "finish": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "shade",
+            "finish"
+          ],
+          "additionalProperties": false
+        },
+        "provenance": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "verified",
+                "synthetic"
+              ]
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https://"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "title",
+            "url"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "attributes",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "ProductQuery": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "ProductCatalog": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Product"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "Health": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "const": "alive"
+        },
+        "dependencies": {
+          "type": "object",
+          "properties": {
+            "agent": {
+              "type": "string",
+              "enum": [
+                "unchecked",
+                "healthy",
+                "unhealthy"
+              ]
+            },
+            "vision": {
+              "type": "string",
+              "enum": [
+                "unchecked",
+                "healthy",
+                "unhealthy"
+              ]
+            },
+            "memory": {
+              "type": "string",
+              "enum": [
+                "unchecked",
+                "healthy",
+                "unhealthy"
+              ]
+            },
+            "products": {
+              "type": "string",
+              "enum": [
+                "unchecked",
+                "healthy",
+                "unhealthy"
+              ]
+            }
+          },
+          "required": [
+            "agent",
+            "vision",
+            "memory",
+            "products"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "dependencies"
+      ],
+      "additionalProperties": false
+    },
+    "AgentMessageResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/AgentMessage"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    "VisionAnalysisResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/VisionAnalysis"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryProfileResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/MemoryProfile"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryProposalResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/MemoryProposal"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryConfirmationResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/MemoryRecord"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryDeletionResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/MemoryDeletion"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    "ProductCatalogResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/ProductCatalog"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "const": "live"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "provenance": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "const": "verified"
+                            },
+                            "url": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "HealthResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "data": {
+          "$ref": "#/$defs/Health"
+        }
+      },
+      "required": [
+        "meta",
+        "data"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
